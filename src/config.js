@@ -11,7 +11,7 @@ export const config = {
 
   // Network safety knobs for the outbound fetch.
   fetch: {
-    timeoutMs: Number(process.env.FETCH_TIMEOUT_MS) || 6000,
+    timeoutMs: Number(process.env.FETCH_TIMEOUT_MS) || 9000,
     maxBytes: Number(process.env.FETCH_MAX_BYTES) || 2 * 1024 * 1024, // 2 MB
     maxRedirects: Number(process.env.FETCH_MAX_REDIRECTS) || 5,
     userAgent:

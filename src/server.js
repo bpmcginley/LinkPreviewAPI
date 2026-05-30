@@ -6,6 +6,23 @@ import { extractMetadata } from "./extract.js";
 const app = express();
 app.disable("x-powered-by");
 
+// Lightweight request logging so we can see exactly what reaches the origin
+// (e.g. when called through the RapidAPI gateway). Never logs the secret value
+// itself — only whether the header was present and whether it matched.
+app.use((req, res, next) => {
+  const start = Date.now();
+  res.on("finish", () => {
+    const hasSecret = Boolean(req.get("X-RapidAPI-Proxy-Secret"));
+    const secretMatches =
+      config.rapidApiSecret && req.get("X-RapidAPI-Proxy-Secret") === config.rapidApiSecret;
+    console.log(
+      `[req] ${req.method} ${req.path} q=${JSON.stringify(req.query)} -> ${res.statusCode} ` +
+        `${Date.now() - start}ms hasSecret=${hasSecret} secretMatches=${Boolean(secretMatches)}`,
+    );
+  });
+  next();
+});
+
 // --- Tiny in-memory TTL cache ---------------------------------------------
 // Keeps repeat lookups of the same URL fast and reduces outbound traffic.
 const cache = new Map(); // url -> { expires, value }
