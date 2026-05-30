@@ -1,17 +1,37 @@
-# Render blueprint. No persistent disk needed — this service is stateless
-# (RapidAPI handles auth, metering and billing; our only state is an in-memory
-# cache). The free plan is fine to start.
+# Render blueprint. Self-serve billing keeps account/API-key state in SQLite,
+# so we attach a small persistent disk and point DB_PATH at it. RapidAPI remains
+# supported as a bonus channel via the proxy secret.
 services:
   - type: web
     name: link-preview-api
     runtime: node
-    plan: free
+    # Starter ($7/mo) is required: self-serve billing keeps account state in
+    # SQLite on a persistent disk (free plan has no disks), and Starter also
+    # never sleeps — so no cold-start 502s. Worth it once the API has a customer.
+    plan: starter
     buildCommand: npm install
     startCommand: npm start
     healthCheckPath: /health
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1
     envVars:
-      # Set this in the Render dashboard to RapidAPI's proxy secret once the API
-      # is listed. Leave unset and the proxy gate stays disabled (open) for
-      # local testing only.
+      # Persist SQLite on the mounted disk so accounts survive deploys.
+      - key: DB_PATH
+        value: /data/data.db
+      # Public URL of this service (used in Stripe redirect URLs). Set to the
+      # service's onrender.com URL (or a custom domain) in the dashboard.
+      - key: BASE_URL
+        sync: false
+      # Optional: RapidAPI proxy secret. If set, requests carrying a matching
+      # X-RapidAPI-Proxy-Secret skip self-serve metering (RapidAPI bills them).
       - key: RAPIDAPI_PROXY_SECRET
+        sync: false
+      # Stripe self-serve billing. Leave unset to run free-key-only.
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_PRICE_ID
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
         sync: false

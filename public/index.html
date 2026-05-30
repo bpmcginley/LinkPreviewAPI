@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Link Preview API — title, description, image &amp; favicon from any URL</title>
+<meta name="description" content="A fast, reliable API that turns any URL into clean preview metadata: title, description, image, favicon, site name and more. Free tier, no credit card. One GET request." />
+<style>
+  :root { --bg:#0b1120; --card:#111a2e; --fg:#f8fafc; --muted:#94a3b8; --accent:#38bdf8; --line:#1e293b; --ok:#4ade80; --err:#f87171; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI",system-ui,Arial,sans-serif; background:var(--bg); color:var(--fg); line-height:1.55; }
+  header, section { max-width: 920px; margin:0 auto; padding:0 20px; }
+  header { padding-top:56px; text-align:center; }
+  .brand { font-size:22px; font-weight:800; letter-spacing:-0.5px; margin-bottom:26px; }
+  .brand .accent { color:var(--accent); }
+  h1 { font-size:42px; line-height:1.15; margin:0 0 12px; }
+  h2 { font-size:27px; margin:46px 0 14px; }
+  .sub { color:var(--muted); font-size:19px; max-width:640px; margin:0 auto 26px; }
+  .accent { color:var(--accent); }
+  a { color:var(--accent); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:22px; margin:18px 0; }
+  label { display:block; font-size:13px; color:var(--muted); margin:10px 0 4px; }
+  input { width:100%; padding:11px 13px; border-radius:8px; border:1px solid var(--line); background:#0b1120; color:var(--fg); font-size:15px; }
+  button { cursor:pointer; border:none; border-radius:8px; padding:12px 20px; font-size:15px; font-weight:600; background:var(--accent); color:#03263a; }
+  button.secondary { background:#1e293b; color:var(--fg); }
+  button:disabled { opacity:.5; cursor:not-allowed; }
+  code, pre { background:#0b1120; border:1px solid var(--line); border-radius:8px; font-family:ui-monospace,Consolas,monospace; font-size:13.5px; }
+  pre { padding:15px; overflow:auto; line-height:1.5; }
+  code { padding:2px 6px; }
+  pre code { border:none; padding:0; }
+  .row { display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+  .row > div { flex:1; min-width:200px; }
+  .pricing { display:flex; gap:18px; flex-wrap:wrap; }
+  .pricing .card { flex:1; min-width:240px; }
+  .price { font-size:34px; font-weight:800; }
+  .muted { color:var(--muted); }
+  .key { word-break:break-all; font-size:14px; color:var(--ok); }
+  .hidden { display:none; }
+  .ok { color:var(--ok); } .err { color:var(--err); }
+  ul { padding-left:18px; } li { margin:5px 0; }
+  footer { text-align:center; color:var(--muted); padding:54px 20px; font-size:13px; border-top:1px solid var(--line); margin-top:48px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">link<span class="accent">preview</span></div>
+  <h1>Turn any URL into a clean <span class="accent">preview card</span></h1>
+  <p class="sub">One GET request returns the title, description, image, favicon, site name and more — the same metadata Slack, iMessage and Twitter use to unfurl links. Fast, cached, and SSRF-safe. Free to start, no credit card.</p>
+  <a href="#signup"><button>Get your free API key</button></a>
+</header>
+
+<section>
+  <h2>One request, everything you need</h2>
+  <div class="card">
+    <pre><code>curl "https://YOUR-HOST/preview?url=https://www.theverge.com&amp;key=YOUR_KEY"</code></pre>
+    <pre><code>{
+  "url": "https://www.theverge.com",
+  "resolvedUrl": "https://www.theverge.com/",
+  "title": "The Verge",
+  "description": "The Verge is about technology and how it makes us feel.",
+  "image": "https://www.theverge.com/static-assets/og-image.png",
+  "favicon": "https://www.theverge.com/favicon.ico",
+  "siteName": "The Verge",
+  "type": "website",
+  "author": null,
+  "publishedTime": null,
+  "themeColor": "#5200ff",
+  "fetchedAt": "2026-05-29T00:00:00.000Z"
+}</code></pre>
+    <p class="muted" style="font-size:14px">Pass your key via <code>?key=</code>, the <code>x-api-key</code> header, or a <code>Bearer</code> token. Responses are cached and every reply includes <code>X-Quota-Remaining</code>.</p>
+  </div>
+</section>
+
+<section id="signup">
+  <h2>Get your API key</h2>
+  <div class="card">
+    <label>Email</label>
+    <div class="row">
+      <div><input id="email" type="email" placeholder="you@example.com" /></div>
+      <button id="signupBtn" onclick="signup()">Create free key</button>
+    </div>
+    <p id="signupMsg" class="muted" style="font-size:14px"></p>
+    <div id="keyBox" class="hidden">
+      <label>Your API key — store it now, it won't be shown again:</label>
+      <pre class="key" id="keyOut"></pre>
+    </div>
+  </div>
+</section>
+
+<section id="dashboard">
+  <h2>Check usage &amp; manage plan</h2>
+  <div class="card">
+    <label>API key</label>
+    <div class="row">
+      <div><input id="acctKey" placeholder="lpk_..." /></div>
+      <button class="secondary" onclick="lookup()">Check</button>
+    </div>
+    <div id="acctInfo" class="hidden" style="margin-top:12px">
+      <p>Plan: <strong id="acctPlan"></strong> · Used this month: <strong id="acctUsed"></strong> / <span id="acctQuota"></span></p>
+      <div class="row">
+        <button id="upgradeBtn" onclick="upgrade()">Upgrade to Pro</button>
+        <button class="secondary" id="manageBtn" onclick="manage()">Manage subscription</button>
+      </div>
+    </div>
+    <p id="acctMsg" class="muted" style="font-size:14px"></p>
+  </div>
+</section>
+
+<section id="pricing">
+  <h2>Pricing</h2>
+  <div class="pricing">
+    <div class="card">
+      <div class="price">Free</div>
+      <p class="muted">100 requests / month</p>
+      <ul>
+        <li>All metadata fields</li>
+        <li>Response caching</li>
+        <li>SSRF-safe fetching</li>
+      </ul>
+    </div>
+    <div class="card" style="border-color:var(--accent)">
+      <div class="price">$9<span style="font-size:16px;font-weight:400" class="muted">/mo</span></div>
+      <p class="muted">10,000 requests / month</p>
+      <ul>
+        <li>Everything in Free</li>
+        <li>100× the quota</li>
+        <li>Priority for new fields</li>
+        <li>Cancel anytime</li>
+      </ul>
+      <a href="#signup"><button>Start free, upgrade later</button></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  Link Preview API — clean URL metadata for any app.
+</footer>
+
+<script>
+const $ = (id) => document.getElementById(id);
+
+async function signup() {
+  const email = $("email").value.trim();
+  $("signupMsg").textContent = "";
+  if (!email) { $("signupMsg").className = "err"; $("signupMsg").textContent = "Enter an email."; return; }
+  $("signupBtn").disabled = true;
+  try {
+    const r = await fetch("/api/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Signup failed.");
+    $("keyBox").classList.remove("hidden");
+    $("keyOut").textContent = data.api_key;
+    $("acctKey").value = data.api_key;
+    $("signupMsg").className = "ok";
+    $("signupMsg").textContent = `Key created. Free plan: ${data.quota} requests/month.`;
+  } catch (e) {
+    $("signupMsg").className = "err";
+    $("signupMsg").textContent = e.message;
+  } finally {
+    $("signupBtn").disabled = false;
+  }
+}
+
+async function lookup() {
+  const key = $("acctKey").value.trim();
+  $("acctMsg").textContent = "";
+  $("acctInfo").classList.add("hidden");
+  if (!key) return;
+  try {
+    const r = await fetch("/api/account?key=" + encodeURIComponent(key));
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Lookup failed.");
+    $("acctPlan").textContent = data.plan;
+    $("acctUsed").textContent = data.used_this_month;
+    $("acctQuota").textContent = data.quota;
+    $("acctInfo").classList.remove("hidden");
+    $("upgradeBtn").classList.toggle("hidden", data.plan === "pro" || !data.stripe_enabled);
+    $("manageBtn").classList.toggle("hidden", data.plan !== "pro");
+    if (!data.stripe_enabled && data.plan !== "pro") {
+      $("acctMsg").className = "muted";
+      $("acctMsg").textContent = "Billing isn't enabled on this instance yet.";
+    }
+  } catch (e) {
+    $("acctMsg").className = "err";
+    $("acctMsg").textContent = e.message;
+  }
+}
+
+async function upgrade() {
+  const key = $("acctKey").value.trim();
+  if (!key) return;
+  $("upgradeBtn").disabled = true;
+  try {
+    const r = await fetch("/api/billing/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Could not start checkout.");
+    window.location = data.url;
+  } catch (e) {
+    $("acctMsg").className = "err";
+    $("acctMsg").textContent = e.message;
+    $("upgradeBtn").disabled = false;
+  }
+}
+
+async function manage() {
+  const key = $("acctKey").value.trim();
+  if (!key) return;
+  try {
+    const r = await fetch("/api/billing/portal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ key }),
+    });
+    const data = await r.json();
+    if (!r.ok) throw new Error(data.error || "Could not open portal.");
+    window.location = data.url;
+  } catch (e) {
+    $("acctMsg").className = "err";
+    $("acctMsg").textContent = e.message;
+  }
+}
+
+if (location.hash === "#dashboard?upgraded=1" || location.search.includes("upgraded=1")) {
+  $("acctMsg").className = "ok";
+  $("acctMsg").textContent = "Upgrade complete — welcome to Pro!";
+}
+</script>
+</body>
+</html>
