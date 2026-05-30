@@ -1,0 +1,17 @@
+# Render blueprint. No persistent disk needed — this service is stateless
+# (RapidAPI handles auth, metering and billing; our only state is an in-memory
+# cache). The free plan is fine to start.
+services:
+  - type: web
+    name: link-preview-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      # Set this in the Render dashboard to RapidAPI's proxy secret once the API
+      # is listed. Leave unset and the proxy gate stays disabled (open) for
+      # local testing only.
+      - key: RAPIDAPI_PROXY_SECRET
+        sync: false

@@ -1,0 +1,18 @@
+{
+  "name": "link-preview-api",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Fast, reliable link preview / URL metadata API — title, description, image, favicon and more from any URL.",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "express": "^4.21.2"
+  }
+}
