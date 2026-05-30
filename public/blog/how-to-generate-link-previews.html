@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<!-- ============ SEO ============ -->
+<title>How to Generate Link Previews Like Slack and Discord (2026 Guide)</title>
+<meta name="description" content="A developer's guide to generating rich link previews like Slack, Discord, and iMessage: how Open Graph metadata works, the edge cases that make it hard, and how to get title, description and image from any URL with one API call." />
+<link rel="canonical" href="https://linkpreviewapi.onrender.com/blog/how-to-generate-link-previews.html" />
+<meta name="robots" content="index, follow" />
+
+<!-- ============ Open Graph ============ -->
+<meta property="og:type" content="article" />
+<meta property="og:title" content="How to Generate Link Previews Like Slack and Discord" />
+<meta property="og:description" content="How Open Graph metadata works, the edge cases that make link previews hard, and how to get them from any URL with one API call." />
+<meta property="og:url" content="https://linkpreviewapi.onrender.com/blog/how-to-generate-link-previews.html" />
+<meta name="twitter:card" content="summary_large_image" />
+
+<!-- ============ Structured data: Article ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "How to Generate Link Previews Like Slack and Discord (2026 Guide)",
+  "description": "A developer's guide to generating rich link previews: how Open Graph metadata works, the edge cases, and how to fetch it from any URL with one API call.",
+  "author": { "@type": "Organization", "name": "Link Preview API" },
+  "publisher": { "@type": "Organization", "name": "Link Preview API" },
+  "datePublished": "2026-05-30",
+  "mainEntityOfPage": "https://linkpreviewapi.onrender.com/blog/how-to-generate-link-previews.html"
+}
+</script>
+
+<!-- ============ Structured data: FAQ ============ -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a link preview?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A link preview is the rich card apps like Slack, Discord, iMessage and Twitter show when you paste a URL: a title, description, image and site name. It is generated from Open Graph and other metadata tags in the linked page's HTML."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I get the title, description and image from a URL?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Fetch the page HTML and parse its Open Graph meta tags (og:title, og:description, og:image), falling back to Twitter Card tags and standard meta tags. In practice you also have to handle redirects, character encodings, missing fields, timeouts, bot-blocking, and security, which is why many teams use a dedicated link preview API instead of writing it themselves."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why not just scrape the Open Graph tags myself?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can, but a reliable implementation has to follow redirects safely, cap response size and time, resolve relative image URLs, fall back gracefully when tags are missing, and block requests to private/internal addresses to prevent SSRF. Those edge cases are where most homegrown scrapers break."
+      }
+    }
+  ]
+}
+</script>
+
+<style>
+  :root { --bg:#0b1120; --card:#111a2e; --fg:#f8fafc; --muted:#94a3b8; --accent:#38bdf8; --line:#1e293b; }
+  * { box-sizing: border-box; }
+  body { margin:0; font-family:"Segoe UI",system-ui,Arial,sans-serif; background:var(--bg); color:var(--fg); line-height:1.65; }
+  .wrap { max-width:760px; margin:0 auto; padding:0 20px; }
+  .topbar { padding:22px 0; border-bottom:1px solid var(--line); }
+  .brand { font-size:20px; font-weight:800; letter-spacing:-0.5px; text-decoration:none; color:var(--fg); }
+  .brand .accent { color:var(--accent); }
+  .eyebrow { color:var(--accent); font-size:14px; font-weight:600; text-transform:uppercase; letter-spacing:.5px; margin-top:40px; }
+  h1 { font-size:38px; line-height:1.2; margin:8px 0 14px; }
+  h2 { font-size:26px; margin:42px 0 10px; }
+  h3 { font-size:19px; margin:28px 0 6px; }
+  p, li { font-size:17px; color:#dbe4f0; }
+  .lead { font-size:20px; color:var(--muted); }
+  .accent { color:var(--accent); }
+  a { color:var(--accent); }
+  code, pre { background:#0b1120; border:1px solid var(--line); border-radius:8px; font-family:ui-monospace,Consolas,monospace; font-size:14px; }
+  pre { padding:16px; overflow:auto; line-height:1.5; }
+  code { padding:2px 6px; font-size:14px; }
+  pre code { border:none; padding:0; }
+  ol, ul { padding-left:22px; } li { margin:6px 0; }
+  .callout { background:var(--card); border:1px solid var(--line); border-left:3px solid var(--accent); border-radius:10px; padding:18px 20px; margin:26px 0; }
+  .cta { display:inline-block; background:var(--accent); color:#03263a; font-weight:700; text-decoration:none; padding:13px 22px; border-radius:9px; margin-top:8px; }
+  .cta-card { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:26px; margin:40px 0; text-align:center; }
+  table { width:100%; border-collapse:collapse; margin:18px 0; font-size:15px; }
+  th, td { border:1px solid var(--line); padding:10px 12px; text-align:left; }
+  th { background:var(--card); }
+  footer { text-align:center; color:var(--muted); padding:50px 20px; font-size:13px; border-top:1px solid var(--line); margin-top:50px; }
+  footer a { color:var(--muted); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="wrap"><a class="brand" href="/">link<span class="accent">preview</span></a></div>
+</div>
+
+<article class="wrap">
+
+  <div class="eyebrow">Developer Guide</div>
+  <h1>How to Generate Link Previews Like Slack and Discord</h1>
+  <p class="lead">When you paste a URL into Slack, Discord, or iMessage, it expands into a rich card with a title, image, and description. Here's how that works under the hood — and how to add it to your own app without reinventing the hard parts.</p>
+
+  <p>That little preview card is one of the highest-trust UI elements you can add to a chat app, comment box, CMS, or bookmarking tool. A bare URL looks like spam; an unfurled link with a title and thumbnail looks legitimate and gets clicked. This guide explains exactly how those previews are generated and the cleanest way to build them.</p>
+
+  <h2>What a link preview actually is</h2>
+  <p>A "link preview" (or "unfurl") is built from <strong>metadata tags</strong> in the linked page's HTML <code>&lt;head&gt;</code>. The dominant standard is the <strong>Open Graph protocol</strong>, originally from Facebook and now read by virtually every platform. A typical page exposes:</p>
+<pre><code>&lt;meta property="og:title"       content="The Verge" /&gt;
+&lt;meta property="og:description" content="Technology, science and culture." /&gt;
+&lt;meta property="og:image"       content="https://.../cover.png" /&gt;
+&lt;meta property="og:site_name"   content="The Verge" /&gt;</code></pre>
+  <p>To build a preview, you fetch the page, read those tags, and render a card. Simple in theory. The trouble is everything that happens between "fetch the page" and "read those tags."</p>
+
+  <h2>The hard part: why a 10-line scraper isn't enough</h2>
+  <p>Most developers start with a quick <code>fetch()</code> + regex, ship it, and then spend the next month patching the long tail of pages that break it. The real-world edge cases:</p>
+  <ul>
+    <li><strong>Redirects.</strong> Short links (t.co, bit.ly) and <code>http → https</code> hops mean the URL you were given isn't the page you end up parsing. You have to follow them — safely.</li>
+    <li><strong>Missing Open Graph tags.</strong> Plenty of sites have no <code>og:*</code> tags at all. You need a fallback chain: Open Graph → Twitter Card → standard <code>&lt;title&gt;</code> and <code>meta description</code> → first <code>&lt;h1&gt;</code>/<code>&lt;img&gt;</code>.</li>
+    <li><strong>Relative image URLs.</strong> <code>og:image</code> is often <code>/images/cover.png</code>, not a full URL. You must resolve it against the final page URL or the image won't load.</li>
+    <li><strong>Encodings &amp; entities.</strong> Non-UTF-8 pages and HTML entities turn into mojibake if you don't decode them.</li>
+    <li><strong>Timeouts &amp; huge pages.</strong> A slow or multi-megabyte page can hang your request or blow up memory. You need a hard timeout and a byte cap.</li>
+    <li><strong>Bot blocking.</strong> Some sites serve different markup to non-browser user agents, or block them entirely.</li>
+    <li><strong>SSRF (the dangerous one).</strong> If you let users submit URLs and fetch them server-side, an attacker can point you at <code>http://169.254.169.254</code> (cloud metadata) or <code>http://localhost</code> to reach internal services. You must block private, loopback, and link-local addresses — on <em>every</em> redirect hop.</li>
+  </ul>
+
+  <div class="callout">
+    <strong>The SSRF point is not optional.</strong> A link-preview feature that fetches arbitrary user-supplied URLs is one of the most common SSRF vectors in real applications. If you build this yourself, validate the resolved IP of every hop against private ranges before connecting.
+  </div>
+
+  <h2>The easy way: one API call</h2>
+  <p>Instead of owning all of that, you can hand the URL to a service that has already solved the edge cases and get clean JSON back. Here's the same result in three languages using the <a href="/">Link Preview API</a>:</p>
+
+  <h3>cURL</h3>
+<pre><code>curl "https://link-preview14.p.rapidapi.com/preview?url=https://www.theverge.com" \
+  -H "X-RapidAPI-Key: YOUR_KEY" \
+  -H "X-RapidAPI-Host: link-preview14.p.rapidapi.com"</code></pre>
+
+  <h3>JavaScript</h3>
+<pre><code>const res = await fetch(
+  "https://link-preview14.p.rapidapi.com/preview?url=" +
+    encodeURIComponent(targetUrl),
+  { headers: {
+      "X-RapidAPI-Key": "YOUR_KEY",
+      "X-RapidAPI-Host": "link-preview14.p.rapidapi.com",
+  } },
+);
+const preview = await res.json();</code></pre>
+
+  <h3>Python</h3>
+<pre><code>import requests
+r = requests.get(
+    "https://link-preview14.p.rapidapi.com/preview",
+    params={"url": target_url},
+    headers={
+        "X-RapidAPI-Key": "YOUR_KEY",
+        "X-RapidAPI-Host": "link-preview14.p.rapidapi.com",
+    },
+)
+preview = r.json()</code></pre>
+
+  <h2>What you get back</h2>
+<pre><code>{
+  "url": "https://www.theverge.com",
+  "resolvedUrl": "https://www.theverge.com/",
+  "title": "The Verge",
+  "description": "The Verge is about technology and how it makes us feel.",
+  "image": "https://www.theverge.com/static-assets/og-image.png",
+  "favicon": "https://www.theverge.com/favicon.ico",
+  "siteName": "The Verge",
+  "type": "website",
+  "author": null,
+  "publishedTime": null,
+  "themeColor": "#5200ff",
+  "fetchedAt": "2026-05-30T00:00:00.000Z"
+}</code></pre>
+
+  <table>
+    <tr><th>Field</th><th>What it's for</th></tr>
+    <tr><td><code>title</code> / <code>description</code></td><td>The headline and subtext of your preview card.</td></tr>
+    <tr><td><code>image</code></td><td>The thumbnail — already resolved to an absolute URL.</td></tr>
+    <tr><td><code>favicon</code></td><td>The small site icon, for a source badge.</td></tr>
+    <tr><td><code>siteName</code></td><td>Falls back to the hostname when not declared.</td></tr>
+    <tr><td><code>resolvedUrl</code></td><td>Where redirects actually landed.</td></tr>
+  </table>
+  <p>Every missing field comes back as <code>null</code>, so the response shape never changes and your rendering code stays simple.</p>
+
+  <div class="cta-card">
+    <h3 style="margin-top:0">Add link previews in an afternoon</h3>
+    <p style="color:var(--muted)">Free tier, no credit card. Redirects, fallbacks, and SSRF protection handled for you.</p>
+    <a class="cta" href="/">Get a free API key →</a>
+  </div>
+
+  <h2>Frequently asked questions</h2>
+
+  <h3>What is a link preview?</h3>
+  <p>The rich card apps show when you paste a URL — title, description, image, and site name — generated from the Open Graph and other metadata tags in the page's HTML.</p>
+
+  <h3>How do I get the title, description, and image from a URL?</h3>
+  <p>Fetch the page and parse its <code>og:title</code>, <code>og:description</code>, and <code>og:image</code> tags, with fallbacks to Twitter Card and standard meta tags. You also have to handle redirects, encodings, missing fields, timeouts, and security — which is why a dedicated API is usually faster than building it yourself.</p>
+
+  <h3>Why not just scrape the Open Graph tags myself?</h3>
+  <p>You can, and for a single trusted URL it's fine. It gets hard when URLs are user-submitted: you need safe redirect following, size/time caps, relative-URL resolution, graceful fallbacks, and SSRF blocking on every hop. Those are exactly the cases a purpose-built service handles.</p>
+
+</article>
+
+<footer>
+  <a href="/">Link Preview API</a> — clean URL metadata for any app.
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://linkpreviewapi.onrender.com/sitemap.xml
